@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR DOGS - El Juego del Mundial</title>
+    <style>
+        body { background: #000; color: white; font-family: 'Arial', sans-serif; margin: 0; text-align: center; }
+        .banner-container { width: 100%; max-height: 400px; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid #ffdb58; }
+        .banner { width: 100%; height: auto; max-height: 400px; object-fit: contain; }
+        .content { padding: 20px; }
+        .casino-container { background: #111; padding: 30px; border: 4px solid #ffdb58; border-radius: 25px; margin: 20px auto; max-width: 450px; box-shadow: 0 0 20px rgba(255, 219, 88, 0.3); }
+        .slot-box { display: flex; justify-content: center; gap: 15px; background: #222; padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid #333; overflow: hidden; }
+        .slot { width: 100px; height: 100px; background: #fff; border-radius: 12px; overflow: hidden; position: relative; border: 3px solid #444; }
+        .reel { position: absolute; top: 0; left: 0; width: 100%; display: flex; flex-direction: column; }
+        .reel img { width: 100px; height: 100px; object-fit: cover; display: block; }
+        .spinning { filter: blur(3px); }
+        .input-mrdogs { padding: 15px; border-radius: 10px; border: none; width: 80%; margin-bottom: 10px; font-size: 1.2rem; text-align: center; font-weight: bold; background: #eee; }
+        .btn { display: block; width: 85%; max-width: 320px; margin: 15px auto; padding: 18px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; transition: 0.2s; }
+        .btn:active { transform: scale(0.95); }
+        .btn-wa { background: #25d366; color: white; }
+        .btn-jugar { background: #b01a1a; color: white; }
+        .btn-girar { background: #ffdb58; color: black; box-shadow: 0 5px 0 #b89b2d; }
+        .btn-gps { background: #4285F4; color: white; }
+        #mensaje-juego { font-weight: bold; color: #ffdb58; margin-top: 15px; min-height: 1.5em; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="banner-container">
+        <img src="4.png" class="banner" alt="MR DOGS">
+    </div>
+
+    <div class="content">
+        <h1 style="color: #ffdb58;">MR DOGS</h1>
+        <div class="casino-container">
+            <h2 style="margin-top: 0;">🎰 ABRE EL COFRE</h2>
+            
+            <div id="setup-juego">
+                <input type="text" id="codigo-ticket" class="input-mrdogs" placeholder="CÓDIGO (Ej: 001)">
+                <button onclick="validarCodigo()" class="btn btn-jugar">VERIFICAR CÓDIGO</button>
+            </div>
+
+            <div id="area-juego" style="display: none;">
+                <div class="slot-box">
+                    <div class="slot"><div class="reel" id="reel1"></div></div>
+                    <div class="slot"><div class="reel" id="reel2"></div></div>
+                    <div class="slot"><div class="reel" id="reel3"></div></div>
+                </div>
+                <p>Intentos: <span id="intentos-txt" style="color:#ffdb58; font-weight:bold;">3</span>/3</p>
+                <button id="btn-spin" onclick="lanzarGiroPro()" class="btn btn-girar">¡GIRAR AHORA!</button>
+            </div>
+            
+            <p id="mensaje-juego"></p>
+        </div>
+
+        <a href="productos.html" class="btn" style="background: #ffdb58; color: black;">📖 VER EL MENÚ COMPLETO</a>
+        <a href="https://wa.me/573147300682" target="_blank" class="btn btn-wa">📱 PEDIR POR WHATSAPP</a>
+        <a href="https://maps.google.com" target="_blank" class="btn btn-gps">📍 CÓMO LLEGAR (GPS)</a>
+    </div>
+
+    <script>
+        // MODO ENSAYO: Resetea códigos cada vez que refrescas la página
+        // Borra la siguiente línea cuando el sitio sea oficial:
+        localStorage.clear(); 
+
+        const figuras = ['1.png', '2.png', '3.png']; 
+        let intentos = 3;
+        let hoy = new Date();
+        let mesActual = hoy.getMonth();
+        let diaDelMes = hoy.getDate();
+
+        let stats = JSON.parse(localStorage.getItem('mrdogs_stats_mensual')) || { 
+            mes: mesActual, camisetas: 0, descuentos: 0, domis: 0 
+        };
+
+        let usados = JSON.parse(localStorage.getItem('mrdogs_usados')) || {};
+
+        function prepararReel(id, figuraFinal = null) {
+            const reel = document.getElementById('reel' + id);
+            let html = '';
+            for (let i = 0; i < 19; i++) {
+                html += `<img src="${figuras[Math.floor(Math.random() * 3)]}">`;
+            }
+            // La imagen 20 es el resultado final
+            let final = figuraFinal !== null ? figuraFinal : Math.floor(Math.random() * 3);
+            html += `<img src="${figuras[final]}">`;
+            reel.innerHTML = html;
+            return final;
+        }
+
+        prepararReel(1); prepararReel(2); prepararReel(3);
+
+        function validarCodigo() {
+            let cod = document.getElementById('codigo-ticket').value.trim().toUpperCase();
+            if (cod === "") { alert("Escribe un código."); return; }
+            if (usados[cod]) { alert("Este código ya fue usado 🌭🚫."); return; }
+            document.getElementById('setup-juego').style.display = 'none';
+            document.getElementById('area-juego').style.display = 'block';
+            document.getElementById('mensaje-juego').innerText = "¡Mucha suerte!";
+        }
+
+        function lanzarGiroPro() {
+            if (intentos <= 0) return;
+            intentos--;
+            document.getElementById('intentos-txt').innerText = intentos;
+            document.getElementById('btn-spin').disabled = true;
+            document.getElementById('mensaje-juego').innerText = "¡Girando!";
+
+            // 1. Decidir resultado (Probabilidad 1%)
+            let suerte = Math.random();
+            let res = [Math.floor(Math.random() * 3), Math.floor(Math.random() * 3), Math.floor(Math.random() * 3)];
+            let esGanador = false;
+
+            if (suerte < 0.01) {
+                // Camiseta: Días 1-5 o 25-31 y solo 2 al mes
+                if ((diaDelMes <= 5 || diaDelMes >= 25) && stats.camisetas < 2) {
+                    res = [2, 2, 2]; esGanador = true;
+                } else if (stats.domis < 8) {
+                    res = [0, 0, 0]; esGanador = true;
+                } else if (stats.descuentos < 8) {
+                    res = [1, 1, 1]; esGanador = true;
+                }
+            }
+
+            // Seguridad: Romper tríos accidentales si no tocaba ganar
+            if (!esGanador && res[0] === res[1] && res[1] === res[2]) {
+                res[2] = (res[0] + 1) % 3;
+            }
+
+            // 2. Ejecutar Animación
+            [1, 2, 3].forEach((id, i) => {
+                const reel = document.getElementById('reel' + id);
+                reel.style.transition = 'none';
+                reel.style.transform = 'translateY(0)';
+                
+                prepararReel(id, res[i]);
+
+                void reel.offsetWidth; // Reset visual
+
+                const tiempo = 2 + (i * 0.6);
+                reel.style.transition = `transform ${tiempo}s cubic-bezier(0.15, 0, 0.15, 1.05)`;
+                reel.classList.add('spinning');
+                reel.style.transform = `translateY(-${19 * 100}px)`;
+
+                setTimeout(() => {
+                    reel.classList.remove('spinning');
+                    if (i === 2) verificarFinal(res);
+                }, tiempo * 1000);
+            });
+        }
+
+        function verificarFinal(res) {
+            let msg = document.getElementById('mensaje-juego');
+            if (res[0] === res[1] && res[1] === res[2]) {
+                if (res[0] === 2) { msg.innerHTML = "🏆 ¡GANASTE LA CAMISETA!"; stats.camisetas++; }
+                else if (res[0] === 0) { msg.innerHTML = "🛵 ¡DOMICILIO GRATIS!"; stats.domis++; }
+                else if (res[0] === 1) { msg.innerHTML = "🎁 ¡20% DE DESCUENTO!"; stats.descuentos++; }
+                
+                localStorage.setItem('mrdogs_stats_mensual', JSON.stringify(stats));
+                marcarUsado();
+            } else if (intentos === 0) {
+                msg.innerText = "¡No te rindas! Prueba con otro pedido.";
+                marcarUsado();
+            } else {
+                msg.innerText = "¡Casi! Te quedan " + intentos + " intentos.";
+                document.getElementById('btn-spin').disabled = false;
+            }
+        }
+
+        function marcarUsado() {
+            let cod = document.getElementById('codigo-ticket').value.toUpperCase();
+            usados[cod] = true;
+            localStorage.setItem('mrdogs_usados', JSON.stringify(usados));
+        }
+    </script>
+</body>
+</html>
