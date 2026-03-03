@@ -68,6 +68,7 @@
         .btn-wa { background: #25d366; color: white; }
         .btn-jugar { background: #b01a1a; color: white; }
         .btn-girar { background: #ffdb58; color: black; box-shadow: 0 5px 0 #b89b2d; }
+        .btn-gps { background: #4285F4; color: white; } /* Color azul para el GPS */
         #mensaje-juego { font-weight: bold; color: #ffdb58; margin-top: 15px; min-height: 1.5em; font-size: 1.2rem; }
     </style>
 </head>
@@ -109,9 +110,11 @@
 
         <a href="productos.html" class="btn" style="background: #ffdb58; color: black;">📖 VER EL MENÚ COMPLETO</a>
         <a href="https://wa.me/573147300682" target="_blank" class="btn btn-wa">📱 PEDIR POR WHATSAPP</a>
+        <a href="https://maps.app.goo.gl/zPzpaewUAK4YPKAP6" target="_blank" class="btn btn-gps">📍 DÓNDE ESTAMOS UBICADOS</a>
     </div>
 
     <script>
+        // Reloj mundialista (Junio 11, 2026)
         function actualizarReloj() {
             const fechaMundial = new Date('June 11, 2026 00:00:00').getTime();
             const ahora = new Date().getTime();
